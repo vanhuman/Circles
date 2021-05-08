@@ -1,0 +1,12 @@
+body {
+    font-family: monaco,Consolas,Lucida Console,monospace;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background: #000;
+}
+
+canvas {
+}
