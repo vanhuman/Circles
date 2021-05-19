@@ -1,5 +1,5 @@
 import {Helper} from '../helpers/helper.js';
-import {CanvasConfig} from './canvas-config.js';
+import {CanvasConfig} from '../services/canvas-config.js';
 
 export class PointMovement {
     point = null;
@@ -8,7 +8,7 @@ export class PointMovement {
         this.point = point;
     }
 
-    vibratePoint(amp = 1, withJumps = false) {
+    vibratePoint(vibrateWidth = 1, withJumps = false) {
         const wait = 50;
         const point = this.point;
         const checkOutOfRange = this.checkOutOfRange;
@@ -26,8 +26,8 @@ export class PointMovement {
             } else {
                 jumpFactor = 30;
             }
-            dx = amp * directionX * jumpFactor;
-            dy = amp * directionY * jumpFactor;
+            dx = vibrateWidth * directionX * jumpFactor;
+            dy = vibrateWidth * directionY * jumpFactor;
             [dx, dy, directionX, directionY] = checkOutOfRange(dx, dy, point.position.x, point.position.y, directionX, directionY);
             point.setOffset(dx, dy);
             point.updateAudio();

@@ -1,76 +1,76 @@
 import {PointAudio} from './point-audio.js';
 import {PointMovement} from './point-movement.js';
+import {CanvasConfig} from '../services/canvas-config.js';
+import {Helper} from '../helpers/helper.js';
 
 export class Point {
-    canvasContext = null;
-    audioContext = null;
-    pointAudio = null;
-    pointMovement = null;
-    baseColor = [0, 0, 0];
-    color = this.baseColor;
-    shape = 'circle';
-    size = 50;
-    position = {
-        x: 0,
-        y: 0,
-    };
     previousPosition = {
-        x: 0,
-        y: 0,
+        x: -1000,
+        y: -1000,
     };
+    clearBeforeDraw = true;
+    collision = true;
 
-    constructor(canvas, audioContext, xPosition, yPosition, color, size, shape) {
-        this.canvasContext = canvas.getContext();
+    constructor(canvas, audioContext, config) {
+        this.canvas = canvas;
         this.audioContext = audioContext;
-        this.position = {
-            x: xPosition,
-            y: yPosition,
-        };
-        this.color = color;
-        if (size) {
-            this.size = size;
-        }
-        if (shape) {
-            this.shape = shape;
-        }
-
+        this.position = config.position;
+        this.color = CanvasConfig.params.color ? Helper.hexToRgb(CanvasConfig.params.color) : config.color;
+        this.size = CanvasConfig.params.size && CanvasConfig.params.size !== '' ? CanvasConfig.params.size : config.size;
+        this.shape = config.shape;
         this.pointAudio = new PointAudio(this);
         this.pointAudio.play();
+        this.pointMovement = new PointMovement(this);
     }
 
-    startMovement(vibrateWidth = 3, vibrateWithJumps = false, moveAround = false) {
-        this.pointMovement = new PointMovement(this);
+    startVibration(vibrateWidth = 2, vibrateWithJumps = false) {
         this.pointMovement.vibratePoint(vibrateWidth, vibrateWithJumps);
+        return this;
+    }
 
-        if (moveAround) {
-            // this.pointMovement.movePoint(5, 5, 1, 1);
+    startMovement(deltaX = 5, deltaY = 5, directionX = 1, directionY = 1) {
+        this.pointMovement.movePoint(deltaX, deltaY, directionX, directionY);
 
-            // this.pointMovement.stopAt('bottom', this.pointMovement.movePoint(0, 30, null, 1))
-            //     .then(() => this.pointMovement.stopAt('right', this.pointMovement.movePoint(30, 0, 1, null)))
-            //     .then(() => this.pointMovement.stopAt('top', this.pointMovement.movePoint(0, 30, null, -1)))
-            //     .then(() => this.pointMovement.stopAt('left', this.pointMovement.movePoint(30, 0, 1, null)))
-            //     .then(() => console.log('done'));
-        }
+        // this.pointMovement.stopAt('bottom', this.pointMovement.movePoint(0, 30, null, 1))
+        //     .then(() => this.pointMovement.stopAt('right', this.pointMovement.movePoint(30, 0, 1, null)))
+        //     .then(() => this.pointMovement.stopAt('top', this.pointMovement.movePoint(0, 30, null, -1)))
+        //     .then(() => this.pointMovement.stopAt('left', this.pointMovement.movePoint(30, 0, 1, null)))
+        //     .then(() => console.log('done'));
+
+        return this;
     }
 
     setPosition(x, y) {
         this.previousPosition = Object.assign({}, this.position);
         this.position.x = x;
         this.position.y = y;
+        this.canvas.registerPosition(this, this.position);
+        this.collision = this.canvas.checkForCollisionWithPoint(this);
     }
 
     setOffset(dx, dy) {
-        this.previousPosition = Object.assign({}, this.position);
-        this.position.x = this.position.x + dx;
-        this.position.y = this.position.y + dy;
+        this.setPosition(this.position.x + dx, this.position.y + dy);
+    }
+
+    setClearBeforeDraw(clearBeforeDraw) {
+        this.clearBeforeDraw = clearBeforeDraw;
+        return this;
     }
 
     draw() {
         if (this.shape === 'circle') {
-            this.drawCircle(true);
+            if (CanvasConfig.params.enableClear || (this.clearBeforeDraw && !CanvasConfig.disableClear && !CanvasConfig.params.disableClear)) {
+                let alpha;
+                alpha = this.canvas.context.globalAlpha;
+                this.canvas.context.globalAlpha = 1;
+                this.drawCircle(true);
+                this.canvas.context.globalAlpha = alpha;
+            }
             this.drawCircle();
         } else {
-            this.drawSquare(true);
+            if (this.clearBeforeDraw) {
+                this.drawSquare(true);
+            }
             this.drawSquare();
         }
     }
@@ -82,13 +82,12 @@ export class Point {
         if (clear) {
             x = this.previousPosition.x;
             y = this.previousPosition.y;
-            color = this.baseColor;
+            color = CanvasConfig.baseColor;
         }
-        // this.context.globalAlpha = 0.5;
-        this.canvasContext.beginPath();
-        this.canvasContext.fillStyle = "rgb(" + color[0] + ", " + color[1] + ", " + color[2] + ")";
-        this.canvasContext.arc(x, y, 0.5 * this.size, 0, 2 * Math.PI);
-        this.canvasContext.fill();
+        this.canvas.context.beginPath();
+        this.canvas.context.fillStyle = "rgb(" + color[0] + ", " + color[1] + ", " + color[2] + ")";
+        this.canvas.context.arc(x, y, 0.5 * this.size, 0, 2 * Math.PI);
+        this.canvas.context.fill();
     }
 
     drawSquare(clear = false) {
@@ -98,10 +97,10 @@ export class Point {
         if (clear) {
             x = this.previousPosition.x;
             y = this.previousPosition.y;
-            color = this.baseColor;
+            color = CanvasConfig.baseColor;
         }
-        this.canvasContext.fillStyle = "rgb(" + color[0] + ", " + color[1] + ", " + color[2] + ")";
-        this.canvasContext.fillRect(x, y, this.size, this.size);
+        this.canvas.context.fillStyle = "rgb(" + color[0] + ", " + color[1] + ", " + color[2] + ")";
+        this.canvas.context.fillRect(x, y, this.size, this.size);
     }
 
     play(fadeTime = 20) {
@@ -111,5 +110,4 @@ export class Point {
     updateAudio() {
         this.pointAudio.updateAudio();
     }
-
 }

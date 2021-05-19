@@ -1,12 +1,11 @@
-import {Point} from './models/point.js';
-import {Audio} from './models/audio.js';
-import {Canvas} from './models/canvas.js';
+import {Audio} from './services/audio.js';
+import {Canvas} from './services/canvas.js';
+import {CanvasConfig} from './services/canvas-config.js';
+import {Drawing} from './models/drawing.js';
 
 export class App {
-    canvas = null;
-    audioContext = null;
-
     constructor() {
+        CanvasConfig.getQueryString();
         this.initCanvas();
         this.initAudio();
         this.startDrawing();
@@ -22,25 +21,23 @@ export class App {
     }
 
     startDrawing() {
-        // this.drawPoint(200, 200, this.getRandomColor());
-        // this.drawPoint(50, 500, this.getRandomColor());
-        // this.drawPoint(1600, 400, this.getRandomColor());
-        // this.drawPoint(1400, 700, this.getRandomColor());
-        // this.drawPoint(900, 100, this.getRandomColor());
-        // this.drawPoint(1000, 500, this.getRandomColor());
-
-        this.drawPoint(500, 300, this.getRandomColor(), 200)
-        this.drawPoint(500, 300, this.getRandomColor(), 200)
-        this.drawPoint(500, 300, this.getRandomColor(), 200)
+        const scenario = CanvasConfig.params.scenario ?? 'static';
+        const drawing = new Drawing(this.canvas, this.audioContext);
+        this.postInstructions(drawing);
+        if (drawing['scenario_' + scenario] instanceof Function) {
+            drawing['scenario_' + scenario]();
+        } else {
+            drawing['scenario_static']();
+        }
     }
 
-    drawPoint(xPosition = 200, yPosition = 200, color = [255, 255, 255], size, shape) {
-        const point = new Point(this.canvas, this.audioContext, xPosition, yPosition, color, size, shape);
-        point.draw();
-        point.startMovement(3, false);
-    }
-
-    getRandomColor() {
-        return [Math.floor(Math.random() * 255), Math.floor(Math.random() * 255), Math.floor(Math.random() * 255)];
+    postInstructions(object) {
+        console.log('Use querystring parameters for different configurations. Possible keys are scenario, color, background, alpha, disableClear, enableClear');
+        const scenarios = Object.getOwnPropertyNames(Object.getPrototypeOf(object)).filter(method => method.substring(0, 8) === 'scenario');
+        console.log('Possible scenarios: ' + scenarios.map(scenario => scenario.substring(9)).join(', ') + '.');
+        console.log('Color and background are hexadecimal without the # sign.');
+        console.log('The alpha parameter can be just a number for a static alpha value, or 4 values indicating the type of process (only "fade-in" for now), ' +
+            'the initial alpha value, the step value and the wait value (in seconds); for example: fade-in,0.005,0.001,0.1.');
+        console.log('The parameters disableClear or enableClear override whether the previous points are cleared or not; any value will trigger this.');
     }
 }

@@ -1,133 +1,207 @@
-import {CanvasConfig} from './canvas-config.js';
+import {CanvasConfig} from '../services/canvas-config.js';
+import {Helper} from '../helpers/helper.js';
 
 export class PointAudio {
-    point = null;
-    audioContext = null;
-    canvasConfig = null;
     osc = {};
-    masterGain = 0.1;
-    panner = null;
+    main = {};
+    settings = {
+        masterGain: 0.05,
+        baseFrequency: 0,
+        osctype: 'sine',
+        attack: 5
+    }
+    baseFactor = 1.5;
+    baseLine = CanvasConfig.height * this.baseFactor;
+    collisionStarted = true;
+    firstBreathIsPassed = false;
 
     constructor(point) {
         this.point = point;
         this.audioContext = point.audioContext;
-        this.canvasConfig = point.canvasConfig;
+        setTimeout(() => {
+            this.firstBreathIsPassed = true;
+        }, 100);
     }
 
-    play(fadeTime = 200) {
-        let color = this.point.color;
-        let freq = [80, 200, 400], baseFreq = 0.0, gain = [0, 0, 0];
-        let attack = 0.1, release = Math.min(2, 2 * fadeTime); // in seconds
-        let osctype = 'sine';
-        this.osc.osc1 = this.audioContext.createOscillator();
-        this.osc.osc2 = this.audioContext.createOscillator();
-        this.osc.osc3 = this.audioContext.createOscillator();
-        let osc1gain = this.audioContext.createGain(),
-            osc2gain = this.audioContext.createGain(),
-            osc3gain = this.audioContext.createGain();
-        let tremolo = this.audioContext.createGain(),
-            master = this.audioContext.createGain();
-        let compressor = this.audioContext.createDynamicsCompressor();
-        let tremInterval; // tremolo setInterval
-        this.panner = this.audioContext.createStereoPanner();
-
-        // map rgb values to frequencies
-        freq = [50 + (color[0] / 255) * 100, 200 + (color[1] / 255) * 200, 400 + (color[2] / 255) * 400];
-        // octave depending on y
-        // for (let i = 0; i < freq.length; i++) {
-        //     freq[i] = freq[i] * (Point.nbrY - y);
-        // }
-        // round to integers and add baseFreq
-        freq = [
-            baseFreq + Number(freq[0].toFixed()),
-            baseFreq + Number(freq[1].toFixed()),
-            baseFreq + Number(freq[2].toFixed())
-        ];
-        this.osc.osc1base = freq[0];
-        this.osc.osc2base = freq[1];
-        this.osc.osc3base = freq[2];
-
-        const baseLine = CanvasConfig.height * 1.5;
-        const factor = 1.5 * ((baseLine - this.point.position.y) / baseLine);
-        freq[0] = freq[0] * factor;
-        freq[1] = freq[1] * factor;
-        freq[2] = freq[2] * factor;
-
-        // map rgb values to gains
-        gain = [1 - color[0] / 255, 1 - color[1] / 255, 1 - color[2] / 255].map(Math.sqrt);
-        if (gain[0] === 0 && gain[1] === 0 && gain[2] === 0) {
-            gain = [0.3, 0.3, 0.3];
-        }
-        // console.log("Freqs: "+freq+" Gain: "+gain);
-        this.osc.osc1.type = osctype;
-        this.osc.osc1.frequency.value = freq[0];
-        osc1gain.gain.value = gain[0];
-        this.osc.osc2.type = osctype;
-        this.osc.osc2.frequency.value = freq[1];
-        osc2gain.gain.value = gain[1];
-        this.osc.osc3.type = osctype;
-        this.osc.osc3.frequency.value = freq[2];
-        osc3gain.gain.value = gain[2];
-
-        compressor.threshold.value = -12;
-        compressor.knee.value = 40; // 0-40 where 0=hard knee 40=soft knee
-        compressor.ratio.value = 12; // 12:1 when input is 12db above threshold, output is 1db above
-        compressor.attack.value = 0.001;
-        compressor.release.value = 0.25;
-
-        this.osc.osc1.connect(osc1gain);
-        this.osc.osc2.connect(osc2gain);
-        this.osc.osc3.connect(osc3gain);
-        osc1gain.connect(tremolo);
-        osc2gain.connect(tremolo);
-        osc3gain.connect(tremolo);
-        tremolo.connect(master);
-
-        // map x to panning
-        this.panner.pan.value = this.point.position.x / CanvasConfig.width;
-        master.connect(this.panner);
-        this.panner.connect(compressor);
-
-        compressor.connect(this.audioContext.destination);
-
-        // attack
-        master.gain.setValueAtTime(0, this.audioContext.currentTime);
-        master.gain.linearRampToValueAtTime(this.masterGain, this.audioContext.currentTime + attack);
-        // start osc's
-        this.osc.osc1.start(0);
-        this.osc.osc2.start(0);
-        this.osc.osc3.start(0);
-        // start LFO
-        // tremolo.gain.setValueCurveAtTime(
-        //     Point.lfoValues(fadeTime + release),
-        //     this.audioContext.currentTime,
-        //     fadeTime + release
-        // );
-
-        // schedule fade out and stop
-        const context = this.audioContext;
-        const osc = this.osc;
-        const masterGain = this.masterGain;
-        setTimeout(function () {
-            master.gain.setValueAtTime(masterGain, context.currentTime);
-            master.gain.linearRampToValueAtTime(0, context.currentTime + release);
-            osc.osc1.stop(context.currentTime + release);
-            osc.osc2.stop(context.currentTime + release);
-            osc.osc3.stop(context.currentTime + release);
-            // setTimeout(function () {
-            //     clearInterval(tremInterval)
-            // }, release * 1000);
-        }, fadeTime * 1000);
+    play(fadeTime = 0) {
+        this.defineAudioParts();
+        this.connectAudioParts();
+        this.initCompressor();
+        this.mapXtoPanning();
+        this.setFreqAndGain(this.getFrequenciesFromRgb(), this.getGainsFromRgb());
+        this.startOscillators(fadeTime);
+        this.startMasterGainModulation();
+        this.scheduleStop(fadeTime);
     }
 
     updateAudio() {
-        const baseLine = CanvasConfig.height * 1.5;
-        const factor = 1.5 * ((baseLine - this.point.position.y) / baseLine);
+        const factor = this.baseFactor * ((this.baseLine - this.point.position.y) / this.baseLine);
 
         this.osc.osc1.frequency.linearRampToValueAtTime(this.osc.osc1base * factor, this.audioContext.currentTime + 0.1);
         this.osc.osc2.frequency.linearRampToValueAtTime(this.osc.osc2base * factor, this.audioContext.currentTime + 0.1);
         this.osc.osc3.frequency.linearRampToValueAtTime(this.osc.osc3base * factor, this.audioContext.currentTime + 0.1);
 
-        this.panner.pan.linearRampToValueAtTime(this.point.position.x / (0.5 * CanvasConfig.width) - 1, this.audioContext.currentTime + 0.1);
+        this.main.panner.pan.linearRampToValueAtTime(this.point.position.x / (0.5 * CanvasConfig.width) - 1, this.audioContext.currentTime + 0.1);
+
+        if (this.firstBreathIsPassed) {
+            if (this.point.collision && !this.collisionStarted) {
+                let gain = Math.random() + 0.5;
+                this.osc.gainTjing.gain.setValueAtTime(gain, this.audioContext.currentTime);
+                this.osc.gainTjing.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.2);
+                this.osc.gainTjing.gain.setValueAtTime(0.5 * gain, this.audioContext.currentTime + 0.3);
+                this.osc.gainTjing.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.5);
+                this.osc.gainTjing.gain.setValueAtTime(0.2 * gain, this.audioContext.currentTime + 0.55);
+                this.osc.gainTjing.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.70);
+                if (Math.random() < 0.5) {
+                    this.osc.gainTjing.gain.setValueAtTime(0.1 * gain, this.audioContext.currentTime + 0.8);
+                    this.osc.gainTjing.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.95);
+                }
+                this.collisionStarted = true;
+            }
+            if (!this.point.collision && this.collisionStarted) {
+                this.collisionStarted = false;
+            }
+        }
+    }
+
+    defineAudioParts() {
+        this.main.tremolo = this.audioContext.createGain();
+        this.main.master = this.audioContext.createGain();
+        this.main.compressor = this.audioContext.createDynamicsCompressor();
+        this.main.panner = this.audioContext.createStereoPanner();
+
+        this.osc.osc1 = this.audioContext.createOscillator();
+        this.osc.osc2 = this.audioContext.createOscillator();
+        this.osc.osc3 = this.audioContext.createOscillator();
+        this.osc.gain1 = this.audioContext.createGain();
+        this.osc.gain2 = this.audioContext.createGain();
+        this.osc.gain3 = this.audioContext.createGain();
+
+        this.osc.gainOsc = this.audioContext.createGain();
+
+        this.osc.tjing = this.audioContext.createOscillator();
+        this.osc.gainTjing = this.audioContext.createGain();
+    }
+
+    connectAudioParts() {
+        this.osc.osc1.connect(this.osc.gain1);
+        this.osc.osc2.connect(this.osc.gain2);
+        this.osc.osc3.connect(this.osc.gain3);
+        this.osc.tjing.connect(this.osc.gainTjing);
+        this.osc.gain1.connect(this.osc.gainOsc);
+        this.osc.gain2.connect(this.osc.gainOsc);
+        this.osc.gain3.connect(this.osc.gainOsc);
+        this.osc.gainOsc.connect(this.main.tremolo);
+        this.osc.gainTjing.connect(this.main.tremolo);
+        this.main.tremolo.connect(this.main.master);
+        this.main.master.connect(this.main.panner);
+        this.main.panner.connect(this.main.compressor);
+        this.main.compressor.connect(this.audioContext.destination);
+    }
+
+    initCompressor() {
+        this.main.compressor.threshold.value = -12;
+        this.main.compressor.knee.value = 40; // 0-40 where 0=hard knee 40=soft knee
+        this.main.compressor.ratio.value = 12; // 12:1 when input is 12db above threshold, output is 1db above
+        this.main.compressor.attack.value = 0.001;
+        this.main.compressor.release.value = 0.25;
+    }
+
+    mapXtoPanning() {
+        this.main.panner.pan.value = this.point.position.x / CanvasConfig.width;
+    }
+
+    setFreqAndGain(freq, gain) {
+        this.osc.osc1.type = this.settings.osctype;
+        this.osc.osc1.frequency.value = freq[0];
+        this.osc.gain1.gain.value = gain[0];
+        this.osc.osc2.type = this.settings.osctype;
+        this.osc.osc2.frequency.value = freq[1];
+        this.osc.gain2.gain.value = gain[1];
+        this.osc.osc3.type = this.settings.osctype;
+        this.osc.osc3.frequency.value = freq[2];
+        this.osc.gain3.gain.value = gain[2];
+
+        this.osc.gainOsc.gain.value = 1;
+        this.osc.tjing.frequency.value = freq[0] * 20;
+        this.osc.gainTjing.gain.setValueAtTime(0, this.audioContext.currentTime);
+        this.osc.gainTjing.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.01);
+    }
+
+    startMasterGainModulation() {
+        let sign = 1;
+        let gain = 1;
+        let previousGain;
+        let wait = this.settings.attack;
+        this.osc.gainOsc.gain.setValueAtTime(gain, this.audioContext.currentTime);
+        const masterGainModulation = Helper.taskConstructor(() => {
+            wait = Math.max(10, Math.random() * 60);
+            sign = sign * -1;
+            previousGain = gain;
+            gain = sign === -1 ? Math.random() * 0.5 : 1;
+            console.log(wait, sign, gain);
+            this.osc.gainOsc.gain.setValueAtTime(previousGain, this.audioContext.currentTime);
+            this.osc.gainOsc.gain.exponentialRampToValueAtTime(gain, this.audioContext.currentTime + wait);
+            return wait * 1000;
+        }, wait * 1000);
+    }
+
+    startOscillators(fadeTime) {
+        this.main.master.gain.setValueAtTime(0, this.audioContext.currentTime);
+        this.main.master.gain.linearRampToValueAtTime(this.settings.masterGain, this.audioContext.currentTime + this.settings.attack);
+
+        this.osc.osc1.start(0);
+        this.osc.osc2.start(0);
+        this.osc.osc3.start(0);
+
+        this.osc.tjing.start();
+
+        if (fadeTime > 0) {
+            const release = Math.min(2, 2 * fadeTime); // in seconds
+            this.main.tremolo.gain.setValueCurveAtTime(
+                Helper.lfoValues(fadeTime + release),
+                this.audioContext.currentTime,
+                fadeTime + release
+            );
+        }
+    }
+
+    scheduleStop(fadeTime) {
+        if (fadeTime > 0) {
+            const release = Math.min(2, 2 * fadeTime); // in seconds
+            const context = this.audioContext;
+            const osc = this.osc;
+            const main = this.main;
+            const masterGain = this.settings.masterGain;
+            setTimeout(function () {
+                main.master.gain.setValueAtTime(masterGain, context.currentTime);
+                main.master.gain.linearRampToValueAtTime(0, context.currentTime + release);
+                osc.osc1.stop(context.currentTime + release);
+                osc.osc2.stop(context.currentTime + release);
+                osc.osc3.stop(context.currentTime + release);
+            }, fadeTime * 1000);
+        }
+    }
+
+    getFrequenciesFromRgb() {
+        let freq = [
+            this.settings.baseFrequency + 50 + (this.point.color[0] / 255) * 100,
+            this.settings.baseFrequency + 200 + (this.point.color[1] / 255) * 200,
+            this.settings.baseFrequency + 400 + (this.point.color[2] / 255) * 400
+        ];
+        [this.osc.osc1base, this.osc.osc2base, this.osc.osc3base] = freq;
+
+        // change frequency according to initial y position
+        const factor = this.baseFactor * ((this.baseLine - this.point.position.y) / this.baseLine);
+        freq = freq.map(f => f * factor);
+        return freq;
+    }
+
+    getGainsFromRgb() {
+        let gain = this.point.color.map(c => 1 - (c / 255)).map(Math.sqrt)
+        if (gain.every(g => g === 0)) {
+            gain = [0.3, 0.3, 0.3];
+        }
+        return gain;
     }
 }
