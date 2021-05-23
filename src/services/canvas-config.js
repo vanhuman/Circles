@@ -13,7 +13,7 @@ export class CanvasConfig {
             if (keyValue.length > 1) {
                 params[keyValue[0]] = decodeURIComponent(keyValue[1].replace(/\+/g, " "));
             } else if (keyValue.length === 1 && keyValue[0].length > 0) {
-                params[keyValue[0]] = "";
+                params[keyValue[0]] = "ON";
             }
         }
         this.params = params;

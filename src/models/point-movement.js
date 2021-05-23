@@ -16,7 +16,7 @@ export class PointMovement {
         let directionX = Math.random() < 0.5 ? -1 : 1;
         let directionY = Math.random() < 0.5 ? -1 : 1;
         let dx, dy;
-        let waitFactor = 1;
+        let waitFactor = CanvasConfig.params.vibrationFactor ?? 1;
         let jumpFactor = 1;
         const vibratePoint = Helper.taskConstructor(function () {
             if (count%100 <= 95 || !withJumps) {
@@ -35,12 +35,14 @@ export class PointMovement {
             count++;
             return wait * waitFactor;
         }, wait);
+        return vibratePoint;
     }
 
     movePoint(deltaX, deltaY, directionX, directionY) {
         const wait = 50;
         const point = this.point;
         const checkOutOfRange = this.checkOutOfRange;
+        let waitFactor = CanvasConfig.params.movementFactor ?? 1;
         const movePoint = Helper.taskConstructor(() => {
             let dirX, dirY;
             if (directionX) {
@@ -59,21 +61,21 @@ export class PointMovement {
             point.setOffset(dx, dy);
             point.updateAudio();
             point.draw();
-            return wait;
+            return wait * waitFactor;
         }, wait);
         return movePoint;
     }
 
-    checkOutOfRange(dx, dy, x, y, dirX, dirY) {
+    checkOutOfRange(dx, dy, x, y, directionX, directionY) {
         if (x + dx < 0 || x + dx > CanvasConfig.width) {
-            dx = -1 * dx;
-            dirX = -1 * dirX;
+            dx = -1 * dx + 1; // +1 to give it a kick to not get stuck on that side
+            directionX = -1 * directionX;
         }
         if (y + dy < 0 || y + dy > CanvasConfig.height) {
-            dy = -1 * dy;
-            dirY = -1 * dirY;
+            dy = -1 * dy + 1; // +1 to give it a kick to not get stuck on that side
+            directionY = -1 * directionY;
         }
-        return [dx, dy, dirX, dirY];
+        return [dx, dy, directionX, directionY];
     }
 
     stopAt(location, movePoint) {

@@ -139,11 +139,12 @@ export class PointAudio {
             sign = sign * -1;
             previousGain = gain;
             gain = sign === -1 ? Math.random() * 0.5 : 1;
-            console.log(wait, sign, gain);
+            console.log('new values for wait, sign, gain:', wait.toFixed(1), sign, gain.toFixed(2));
             this.osc.gainOsc.gain.setValueAtTime(previousGain, this.audioContext.currentTime);
             this.osc.gainOsc.gain.exponentialRampToValueAtTime(gain, this.audioContext.currentTime + wait);
             return wait * 1000;
         }, wait * 1000);
+        return masterGainModulation;
     }
 
     startOscillators(fadeTime) {

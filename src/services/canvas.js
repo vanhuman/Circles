@@ -14,7 +14,7 @@ export class Canvas {
         this.setSize();
         this.setBackground();
         this.setAlpha();
-        this.listenForWindowSizeChanges();
+        // this.listenForWindowSizeChanges();
     }
 
     registerPosition(point, position) {
@@ -84,6 +84,7 @@ export class Canvas {
                         alpha = alpha + increment;
                         this.context.globalAlpha = alpha;
                         if (alpha > 1) {
+                            console.log('alpha value reached:', alpha.toFixed(2));
                             alphaFader.stop();
                         }
                     }, 1000 * step);

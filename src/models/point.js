@@ -60,8 +60,7 @@ export class Point {
     draw() {
         if (this.shape === 'circle') {
             if (CanvasConfig.params.enableClear || (this.clearBeforeDraw && !CanvasConfig.disableClear && !CanvasConfig.params.disableClear)) {
-                let alpha;
-                alpha = this.canvas.context.globalAlpha;
+                const alpha = this.canvas.context.globalAlpha;
                 this.canvas.context.globalAlpha = 1;
                 this.drawCircle(true);
                 this.canvas.context.globalAlpha = alpha;
@@ -88,6 +87,16 @@ export class Point {
         this.canvas.context.fillStyle = "rgb(" + color[0] + ", " + color[1] + ", " + color[2] + ")";
         this.canvas.context.arc(x, y, 0.5 * this.size, 0, 2 * Math.PI);
         this.canvas.context.fill();
+
+        if (CanvasConfig.params.circles) {
+            color = CanvasConfig.baseColor;
+            const randX = ((Math.random() - 0.5) * 10);
+            const randY = ((Math.random() - 0.5) * 10);
+            this.canvas.context.beginPath();
+            this.canvas.context.fillStyle = "rgb(" + color[0] + ", " + color[1] + ", " + color[2] + ")";
+            this.canvas.context.arc(x + randX, y + randY, 0.5 * this.size * 0.95, 0, 2 * Math.PI);
+            this.canvas.context.fill();
+        }
     }
 
     drawSquare(clear = false) {
