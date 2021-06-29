@@ -139,7 +139,7 @@ export class PointAudio {
             sign = sign * -1;
             previousGain = gain;
             gain = sign === -1 ? Math.random() * 0.5 : 1;
-            console.log('new values for wait, sign, gain:', wait.toFixed(1), sign, gain.toFixed(2));
+            // console.log('new values for wait, sign, gain:', wait.toFixed(1), sign, gain.toFixed(2));
             this.osc.gainOsc.gain.setValueAtTime(previousGain, this.audioContext.currentTime);
             this.osc.gainOsc.gain.exponentialRampToValueAtTime(gain, this.audioContext.currentTime + wait);
             return wait * 1000;
@@ -185,6 +185,7 @@ export class PointAudio {
     }
 
     getFrequenciesFromRgb() {
+        // console.log('colors: ', this.point.color);
         let freq = [
             this.settings.baseFrequency + 50 + (this.point.color[0] / 255) * 100,
             this.settings.baseFrequency + 200 + (this.point.color[1] / 255) * 200,
@@ -195,14 +196,16 @@ export class PointAudio {
         // change frequency according to initial y position
         const factor = this.baseFactor * ((this.baseLine - this.point.position.y) / this.baseLine);
         freq = freq.map(f => f * factor);
+        // console.log('freqs: ', freq.map(f => Math.floor(f)));
         return freq;
     }
 
     getGainsFromRgb() {
-        let gain = this.point.color.map(c => 1 - (c / 255)).map(Math.sqrt)
+        let gain = this.point.color.map(c => c / 255).map(Math.sqrt)
         if (gain.every(g => g === 0)) {
             gain = [0.3, 0.3, 0.3];
         }
+        // console.log('gains: ', gain.map(g => Number(g.toFixed(2))));
         return gain;
     }
 }

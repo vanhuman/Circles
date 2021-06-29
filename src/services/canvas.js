@@ -17,8 +17,15 @@ export class Canvas {
         // this.listenForWindowSizeChanges();
     }
 
-    registerPosition(point, position) {
+    registerPointPosition(point, position) {
         this.pointPosition.set(point, Object.assign({}, position));
+    }
+
+    deRegisterPoint(point) {
+        if (this.pointPosition.has(point)) {
+            this.pointPosition.delete(point);
+        }
+        console.log(this.pointPosition);
     }
 
     checkForCollisionWithPoint(pointToCheck) {
@@ -62,6 +69,8 @@ export class Canvas {
         }
         const body = document.getElementById('MovingPoints');
         body.style.backgroundColor = '#' + hexColor;
+        this.context.fillStyle = "rgb(" + CanvasConfig.baseColor[0] + "," + CanvasConfig.baseColor[1] + "," + CanvasConfig.baseColor[2] + ")";
+        this.context.fillRect(0, 0, CanvasConfig.width, CanvasConfig.height);
     }
 
     setAlpha(alphaValue) {
@@ -73,7 +82,7 @@ export class Canvas {
         if (!alphaParam) {
             return;
         }
-        if (alphaParam == Number(alphaParam)) {
+        if (isNumber(alphaParam)) {
             this.context.globalAlpha = Number(alphaParam);
         } else {
             let [alphaProcess, alpha, increment, step] = this.getAlphaParameters(alphaParam);
@@ -107,9 +116,9 @@ export class Canvas {
         } else {
             alphaProcess = alphaParam;
         }
-        alpha = alpha == Number(alpha) && Number(alpha) > 0 && Number(alpha) <= 1 ? Number(alpha) : 0.005;
-        increment = increment == Number(increment) && Number(increment) > 0 && Number(increment) <= 1 ? Number(increment) : 0.005;
-        step = step == Number(step) && Number(step) > 0 && Number(step) <= 10 ? Number(step) : 0.1;
+        alpha = isNumber(alpha) && Number(alpha) > 0 && Number(alpha) <= 1 ? Number(alpha) : 0.005;
+        increment = isNumber(increment) && Number(increment) > 0 && Number(increment) <= 1 ? Number(increment) : 0.005;
+        step = isNumber(step) && Number(step) > 0 && Number(step) <= 10 ? Number(step) : 0.1;
         return [alphaProcess, alpha, increment, step];
     }
 }

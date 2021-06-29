@@ -32,9 +32,12 @@ export class Helper {
     };
 
     static lfoValues = (lfoDur) => {
-        var lfoValueCount = 4096, lfoValues = new Float32Array(lfoValueCount), percent;
-        var lfoFreq = 0.5 + Math.random() * 10, lfoDepth = 0.1 + Math.random() * 0.3;
-        for (var i = 0; i < lfoValueCount; i++) {
+        const lfoValueCount = 4096;
+        const lfoValues = new Float32Array(lfoValueCount);
+        const lfoFreq = 0.5 + Math.random() * 10;
+        const lfoDepth = 0.1 + Math.random() * 0.3;
+        let percent;
+        for (let i = 0; i < lfoValueCount; i++) {
             percent = (i / lfoValueCount) * lfoDur * lfoFreq ;
             lfoValues[i] = (1 - lfoDepth) + (Math.sin(percent * 2 * Math.PI) * lfoDepth );
         }
@@ -61,7 +64,7 @@ export class Helper {
     }
 
     static componentToHex(c) {
-        var hex = c.toString(16);
+        const hex = c.toString(16);
         return hex.length === 1 ? '0' + hex : hex;
     }
 }

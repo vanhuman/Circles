@@ -1,8 +1,7 @@
 export class CanvasConfig {
     static width = 1050;
     static height = 600;
-    static baseColor = [255, 255, 255];
-    static disableClear = false;
+    static baseColor = [0, 0, 0];
     static params = {};
 
     static getQueryString() {

@@ -1,5 +1,7 @@
 import {Helper} from '../helpers/helper.js';
 import {CanvasConfig} from '../services/canvas-config.js';
+import {VibrationConfig} from '../config/vibration-config.js';
+import {MovementConfig} from '../config/movement-config.js';
 
 export class PointMovement {
     point = null;
@@ -8,26 +10,34 @@ export class PointMovement {
         this.point = point;
     }
 
-    vibratePoint(vibrateWidth = 1, withJumps = false) {
+    vibratePoint(config) {
+        if (!config) {
+            config = new VibrationConfig();
+        }
         const wait = 50;
         const point = this.point;
         const checkOutOfRange = this.checkOutOfRange;
         let count = 0;
+        let countTo = 0;
         let directionX = Math.random() < 0.5 ? -1 : 1;
         let directionY = Math.random() < 0.5 ? -1 : 1;
         let dx, dy;
         let waitFactor = CanvasConfig.params.vibrationFactor ?? 1;
-        let jumpFactor = 1;
-        const vibratePoint = Helper.taskConstructor(function () {
-            if (count%100 <= 95 || !withJumps) {
+        let jump = 1;
+        this.vibratePointTask = Helper.taskConstructor(function () {
+            if (count%100 === 99 && countTo === 0 && Math.random() < config.jumpChance && config.withJumps) {
+                countTo = config.jumpSteps;
+            }
+            if (countTo > 0) {
+                jump = config.jumpFactor;
+                countTo--;
+            } else {
                 directionX = Math.random() < 0.5 ? -1 : 1;
                 directionY = Math.random() < 0.5 ? -1 : 1;
-                jumpFactor = 1;
-            } else {
-                jumpFactor = 30;
+                jump = 1;
             }
-            dx = vibrateWidth * directionX * jumpFactor;
-            dy = vibrateWidth * directionY * jumpFactor;
+            dx = config.width * directionX * jump;
+            dy = config.width * directionY * jump;
             [dx, dy, directionX, directionY] = checkOutOfRange(dx, dy, point.position.x, point.position.y, directionX, directionY);
             point.setOffset(dx, dy);
             point.updateAudio();
@@ -35,35 +45,37 @@ export class PointMovement {
             count++;
             return wait * waitFactor;
         }, wait);
-        return vibratePoint;
     }
 
-    movePoint(deltaX, deltaY, directionX, directionY) {
+    movePoint(config) {
+        if (!config) {
+            config = new MovementConfig();
+        }
         const wait = 50;
         const point = this.point;
         const checkOutOfRange = this.checkOutOfRange;
         let waitFactor = CanvasConfig.params.movementFactor ?? 1;
-        const movePoint = Helper.taskConstructor(() => {
+        this.movePointTask = Helper.taskConstructor(() => {
             let dirX, dirY;
-            if (directionX) {
-                dirX = directionX;
+            if (config.directionX) {
+                dirX = config.directionX;
             } else {
                 dirX = Math.random() < 0.5 ? -1 : 1;
             }
-            if (directionY) {
-                dirY = directionY;
+            if (config.directionY) {
+                dirY = config.directionY;
             } else {
                 dirY = Math.random() < 0.5 ? -1 : 1;
             }
-            let dx = dirX * deltaX;
-            let dy = dirY * deltaY;
-            [dx, dy, directionX, directionY] = checkOutOfRange(dx, dy, point.position.x, point.position.y, directionX, directionY);
+            let dx = dirX * config.deltaX;
+            let dy = dirY * config.deltaY;
+            [dx, dy, config.directionX, config.directionY] = checkOutOfRange(dx, dy, point.position.x, point.position.y, config.directionX, config.directionY);
             point.setOffset(dx, dy);
             point.updateAudio();
             point.draw();
             return wait * waitFactor;
         }, wait);
-        return movePoint;
+        return this.movePointTask;
     }
 
     checkOutOfRange(dx, dy, x, y, directionX, directionY) {
