@@ -26,7 +26,6 @@ export class PointAudio {
     play(fadeTime = 0) {
         this.defineAudioParts();
         this.connectAudioParts();
-        this.initCompressor();
         this.mapXtoPanning();
         this.setFreqAndGain(this.getFrequenciesFromRgb(), this.getGainsFromRgb());
         this.startOscillators(fadeTime);
@@ -67,7 +66,6 @@ export class PointAudio {
     defineAudioParts() {
         this.main.tremolo = this.audioContext.createGain();
         this.main.master = this.audioContext.createGain();
-        this.main.compressor = this.audioContext.createDynamicsCompressor();
         this.main.panner = this.audioContext.createStereoPanner();
 
         this.osc.osc1 = this.audioContext.createOscillator();
@@ -95,16 +93,7 @@ export class PointAudio {
         this.osc.gainTjing.connect(this.main.tremolo);
         this.main.tremolo.connect(this.main.master);
         this.main.master.connect(this.main.panner);
-        this.main.panner.connect(this.main.compressor);
-        this.main.compressor.connect(this.audioContext.destination);
-    }
-
-    initCompressor() {
-        this.main.compressor.threshold.value = -12;
-        this.main.compressor.knee.value = 40; // 0-40 where 0=hard knee 40=soft knee
-        this.main.compressor.ratio.value = 12; // 12:1 when input is 12db above threshold, output is 1db above
-        this.main.compressor.attack.value = 0.001;
-        this.main.compressor.release.value = 0.25;
+        this.main.panner.connect(this.point.audio.compressor);
     }
 
     mapXtoPanning() {

@@ -25,7 +25,6 @@ export class Canvas {
         if (this.pointPosition.has(point)) {
             this.pointPosition.delete(point);
         }
-        console.log(this.pointPosition);
     }
 
     checkForCollisionWithPoint(pointToCheck) {

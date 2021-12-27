@@ -16,18 +16,18 @@ export class App {
     }
 
     initAudio() {
-        const audio = new Audio();
-        this.audioContext = audio.context;
+       this.audio = new Audio();
     }
 
     startDrawing() {
-        const scenario = CanvasConfig.params.scenario ?? 'static';
-        const drawing = new Drawing(this.canvas, this.audioContext);
+        const drawing = new Drawing(this.canvas, this.audio);
         this.postInstructions(drawing);
-        if (drawing['scenario_' + scenario] instanceof Function) {
+
+        const scenario = CanvasConfig.params.scenario ?? null;
+        if (scenario && drawing['scenario_' + scenario] instanceof Function) {
             drawing['scenario_' + scenario]();
         } else {
-            drawing['scenario_static']();
+            drawing.runRandomScenario();
         }
     }
 

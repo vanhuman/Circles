@@ -13,9 +13,10 @@ export class Point {
     collision = true;
     stopped = false;
 
-    constructor(canvas, audioContext, config) {
+    constructor(canvas, audio, config) {
         this.canvas = canvas;
-        this.audioContext = audioContext;
+        this.audio = audio;
+        this.audioContext = audio.context;
         this.position = config.position;
         this.color = CanvasConfig.params.color ? Helper.hexToRgb(CanvasConfig.params.color) : config.color;
         this.size = CanvasConfig.params.size && CanvasConfig.params.size !== '' ? CanvasConfig.params.size : config.size;
