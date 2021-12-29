@@ -1,5 +1,5 @@
-import {CanvasConfig} from '../services/canvas-config.js';
-import {Helper} from '../helpers/helper.js';
+import { CanvasConfig } from '../services/canvas-config.js';
+import { Helper } from '../helpers/helper.js';
 
 export class PointAudio {
     osc = {};

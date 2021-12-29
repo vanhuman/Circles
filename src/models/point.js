@@ -1,7 +1,7 @@
-import {PointAudio} from './point-audio.js';
-import {PointMovement} from './point-movement.js';
-import {CanvasConfig} from '../services/canvas-config.js';
-import {Helper} from '../helpers/helper.js';
+import { PointAudio } from './point-audio.js';
+import { PointMovement } from './point-movement.js';
+import { CanvasConfig } from '../services/canvas-config.js';
+import { Helper } from '../helpers/helper.js';
 
 export class Point {
     previousPosition = {

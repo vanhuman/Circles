@@ -1,7 +1,7 @@
-import {Helper} from '../helpers/helper.js';
-import {CanvasConfig} from '../services/canvas-config.js';
-import {VibrationConfig} from '../config/vibration-config.js';
-import {MovementConfig} from '../config/movement-config.js';
+import { Helper } from '../helpers/helper.js';
+import { CanvasConfig } from '../services/canvas-config.js';
+import { VibrationConfig } from '../config/vibration-config.js';
+import { MovementConfig } from '../config/movement-config.js';
 
 export class PointMovement {
     point = null;
@@ -25,7 +25,7 @@ export class PointMovement {
         let waitFactor = CanvasConfig.params.vibrationFactor ?? 1;
         let jump = 1;
         this.vibratePointTask = Helper.taskConstructor(function () {
-            if (count%100 === 99 && countTo === 0 && Math.random() < config.jumpChance && config.withJumps) {
+            if (count % 100 === 99 && countTo === 0 && Math.random() < config.jumpChance && config.withJumps) {
                 countTo = config.jumpSteps;
             }
             if (countTo > 0) {

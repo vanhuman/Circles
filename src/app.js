@@ -1,7 +1,7 @@
-import {Audio} from './services/audio.js';
-import {Canvas} from './services/canvas.js';
-import {CanvasConfig} from './services/canvas-config.js';
-import {Drawing} from './models/drawing.js';
+import { Audio } from './services/audio.js';
+import { Canvas } from './services/canvas.js';
+import { CanvasConfig } from './services/canvas-config.js';
+import { Drawing } from './models/drawing.js';
 
 export class App {
     constructor() {
@@ -16,7 +16,7 @@ export class App {
     }
 
     initAudio() {
-       this.audio = new Audio();
+        this.audio = new Audio();
     }
 
     startDrawing() {

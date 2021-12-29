@@ -1,14 +1,14 @@
-import {CanvasConfig} from './canvas-config.js';
-import {Helper} from '../helpers/helper.js';
+import { CanvasConfig } from './canvas-config.js';
+import { Helper } from '../helpers/helper.js';
 
 export class Canvas {
     pointPosition = new Map();
     listeningForWindowSize = false;
     statusList = [];
-    resizeFunction = function() {
+    resizeFunction = function () {
         setTimeout(() => window.location.reload());
     };
-    orientationChangeFunction = function() {
+    orientationChangeFunction = function () {
         window.location.reload();
     };
 
@@ -67,7 +67,7 @@ export class Canvas {
 
     listenForKeys() {
         let self = this;
-        window.addEventListener('keyup', function(event) {
+        window.addEventListener('keyup', function (event) {
             if (event.key === 'n') {
                 self.setStatus('Requesting next scenario...');
                 const stopPromises = Array.from(self.pointPosition.keys()).map(point => point.stop());
@@ -76,6 +76,19 @@ export class Canvas {
             if (event.key === 's') {
                 self.listenForWindowSizeChanges();
                 self.setStatus('Window size listener is ' + (self.listeningForWindowSize ? 'ON' : 'OFF'));
+            }
+            if (event.key === 'q') {
+                self.setStatus('Stopping...');
+                const stopPromises = Array.from(self.pointPosition.keys()).map(point => point.stop());
+                Promise.all(stopPromises);
+            }
+            if (event.key === 'p') {
+                if (self.pointPosition.size !== 0) {
+                    self.setStatus('Already playing...');
+                } else {
+                    self.setStatus('Starting...');
+                    self.drawing.runRandomScenario(true);
+                }
             }
         });
     }
