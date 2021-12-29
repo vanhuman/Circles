@@ -48,7 +48,7 @@ export class Drawing {
                 .setDelayClear(1000)
                 .startVibration(new VibrationConfig(5, true, 3, 40, 0.2))
                 .stopAfter(randInt(40, 60)),
-        ]).then(() => this.runRandomScenario(this.scenario_static));
+        ]).then(() => this.runRandomScenario(), () => {});
     }
 
     scenario_duet() {
@@ -62,7 +62,7 @@ export class Drawing {
                 .startVibration(new VibrationConfig(1))
                 .startMovement(new MovementConfig(15, 2, -1, -1))
                 .stopAfter(randInt(40, 60))
-        ]).then(() => this.runRandomScenario(this.scenario_duet));
+        ]).then(() => this.runRandomScenario(), () => {});
     }
 
     scenario_walk() {
@@ -96,7 +96,7 @@ export class Drawing {
                 .startVibration(new VibrationConfig(3))
                 .startMovement()
                 .stopAfter(randInt(80, 160))
-        ]).then(() => this.runRandomScenario(this.scenario_walk));
+        ]).then(() => this.runRandomScenario(), () => {});
     }
 
     scenario_big() {
@@ -113,7 +113,7 @@ export class Drawing {
                 .startVibration(new VibrationConfig(3))
                 .startMovement(new MovementConfig(2, 1, 1, -1))
                 .stopAfter(randInt(30, 60))
-        ]).then(() => this.runRandomScenario(this.scenario_big));
+        ]).then(() => this.runRandomScenario(), () => {});
     }
 
     scenario_small() {
@@ -138,7 +138,7 @@ export class Drawing {
             );
             i++;
         }
-        Promise.all(promises).then(() => this.runRandomScenario(this.scenario_small));
+        Promise.all(promises).then(() => this.runRandomScenario(), () => {});
     }
 
     scenario_paint() {
@@ -162,7 +162,7 @@ export class Drawing {
                 .startVibration()
                 .startMovement(new MovementConfig(5, 5, -1, -1))
                 .stopAfter(randInt(130, 160))
-        ]).then(() => this.runRandomScenario(this.scenario_big, true));
+        ]).then(() => this.runRandomScenario(true), () => {});
     }
 
     scenario_audiotest() {
@@ -194,7 +194,7 @@ export class Drawing {
             this.drawPoint(new DrawConfig(3 * CanvasConfig.width / 4, CanvasConfig.height / 4, getRandomColor([50, 0, 0], [255, 0, 0]), 200))
                 .startVibration()
                 .stopAfter(90)
-        ]).then(() => this.runRandomScenario(this.scenario_red_alpha));
+        ]).then(() => this.runRandomScenario(), () => {});
     }
 
     scenario_red() {
@@ -215,7 +215,7 @@ export class Drawing {
             this.drawPoint(new DrawConfig(3 * CanvasConfig.width / 4, CanvasConfig.height / 4, getRandomColor([50, 0, 0], [255, 0, 0]), 200))
                 .startVibration()
                 .stopAfter(randInt(40, 60))
-        ]).then(() => this.runRandomScenario(this.scenario_red));
+        ]).then(() => this.runRandomScenario(), () => {});
     }
 
     scenario_blue_alpha() {
@@ -235,7 +235,7 @@ export class Drawing {
             this.drawPoint(new DrawConfig(randInt(0, CanvasConfig.width), randInt(0, CanvasConfig.height), getRandomColor([0, 0, 50], [0, 0, 255]), 200))
                 .startVibration()
                 .stopAfter(randInt(60, 70))
-        ]).then(() => this.runRandomScenario(this.scenario_blue_alpha));
+        ]).then(() => this.runRandomScenario(), () => {});
     }
 
     scenario_blue() {
@@ -253,7 +253,7 @@ export class Drawing {
             this.drawPoint(new DrawConfig(randInt(0, CanvasConfig.width), randInt(0, CanvasConfig.height), getRandomColor([0, 0, 50], [0, 0, 255]), 200))
                 .startVibration()
                 .stopAfter(randInt(60, 70))
-        ]).then(() => this.runRandomScenario(this.scenario_blue));
+        ]).then(() => this.runRandomScenario(), () => {});
     }
 
     scenario_blue_middle() {
@@ -271,7 +271,7 @@ export class Drawing {
             this.drawPoint(new DrawConfig(CanvasConfig.width / 2, CanvasConfig.height / 2, getRandomColor([0, 0, 50], [0, 0, 255]), 200))
                 .startVibration()
                 .stopAfter(randInt(60, 70))
-        ]).then(() => this.runRandomScenario(this.scenario_blue_middle));
+        ]).then(() => this.runRandomScenario(), () => {});
     }
 
     scenario_green() {
@@ -293,7 +293,7 @@ export class Drawing {
                 .startVibration(new VibrationConfig(1))
                 .startMovement(new MovementConfig(4, 0, 1, 1))
                 .stopAfter(randInt(60, 70))
-        ]).then(() => this.runRandomScenario(this.scenario_green));
+        ]).then(() => this.runRandomScenario(), () => {});
     }
 
     scenario_green_alpha() {
@@ -318,7 +318,7 @@ export class Drawing {
                 .startVibration(new VibrationConfig(1))
                 .startMovement(new MovementConfig(4, 0, 1, 1))
                 .stopAfter(randInt(80, 90))
-        ]).then(() => this.runRandomScenario(this.scenario_green_alpha));
+        ]).then(() => this.runRandomScenario(), () => {});
     }
 
     scenario_yellow() {
@@ -340,7 +340,7 @@ export class Drawing {
                 .startVibration()
                 .startMovement(new MovementConfig(4, 0, 1, 1))
                 .stopAfter(15),
-        ]).then(() => this.runRandomScenario(this.scenario_yellow));
+        ]).then(() => this.runRandomScenario(), () => {});
     }
 
     reset(clearBackground = false) {
@@ -353,7 +353,7 @@ export class Drawing {
         CanvasConfig.params.circles = null;
     }
 
-    runRandomScenario(currentScenario, clearBackground = false) {
+    runRandomScenario(clearBackground = false) {
         this.reset(clearBackground);
         let index;
         let scenario;
@@ -361,8 +361,10 @@ export class Drawing {
         while (!validScenario) {
             index = randInt(0, this.scenarios.length - 1);
             scenario = this[this.scenarios[index]];
-            if (!this.skipScenarios.includes(scenario) && scenario !== currentScenario) {
+            if (!this.skipScenarios.includes(scenario) && scenario !== this.currentScenario) {
                 validScenario = true;
+                this.currentScenario = scenario;
+                this.canvas.setStatus('Playing scenario: ' + this.scenarios[index]);
                 setTimeout(() => {
                     scenario.call(this);
                 }, 100);

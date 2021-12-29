@@ -10,3 +10,14 @@ body {
 
 canvas {
 }
+
+div#status {
+    display: none;
+    position: fixed;
+    left: 20px;
+    top: 20px;
+    width: 500px;
+    height: 50px;
+    color: green;
+    font-size: 10px;
+}

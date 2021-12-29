@@ -45,15 +45,16 @@ export class PointAudio {
         if (this.firstBreathIsPassed) {
             if (this.point.collision && !this.collisionStarted) {
                 let gain = Math.random() + 0.5;
-                this.osc.gainTjing.gain.setValueAtTime(gain, this.audioContext.currentTime);
-                this.osc.gainTjing.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.2);
-                this.osc.gainTjing.gain.setValueAtTime(0.5 * gain, this.audioContext.currentTime + 0.3);
-                this.osc.gainTjing.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.5);
-                this.osc.gainTjing.gain.setValueAtTime(0.2 * gain, this.audioContext.currentTime + 0.55);
-                this.osc.gainTjing.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.70);
+                const factor = Math.random() + 0.5;
+                this.osc.gainCollision.gain.setValueAtTime(gain, this.audioContext.currentTime);
+                this.osc.gainCollision.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.2 * factor);
+                this.osc.gainCollision.gain.setValueAtTime(0.5 * gain, this.audioContext.currentTime + 0.3 * factor);
+                this.osc.gainCollision.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.5 * factor);
+                this.osc.gainCollision.gain.setValueAtTime(0.2 * gain, this.audioContext.currentTime + 0.55 * factor);
+                this.osc.gainCollision.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.70 * factor);
                 if (Math.random() < 0.5) {
-                    this.osc.gainTjing.gain.setValueAtTime(0.1 * gain, this.audioContext.currentTime + 0.8);
-                    this.osc.gainTjing.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.95);
+                    this.osc.gainCollision.gain.setValueAtTime(0.1 * gain, this.audioContext.currentTime + 0.8 * factor);
+                    this.osc.gainCollision.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.95 * factor);
                 }
                 this.collisionStarted = true;
             }
@@ -67,30 +68,27 @@ export class PointAudio {
         this.main.tremolo = this.audioContext.createGain();
         this.main.master = this.audioContext.createGain();
         this.main.panner = this.audioContext.createStereoPanner();
-
         this.osc.osc1 = this.audioContext.createOscillator();
         this.osc.osc2 = this.audioContext.createOscillator();
         this.osc.osc3 = this.audioContext.createOscillator();
         this.osc.gain1 = this.audioContext.createGain();
         this.osc.gain2 = this.audioContext.createGain();
         this.osc.gain3 = this.audioContext.createGain();
-
         this.osc.gainOsc = this.audioContext.createGain();
-
-        this.osc.tjing = this.audioContext.createOscillator();
-        this.osc.gainTjing = this.audioContext.createGain();
+        this.osc.collision = this.audioContext.createOscillator();
+        this.osc.gainCollision = this.audioContext.createGain();
     }
 
     connectAudioParts() {
         this.osc.osc1.connect(this.osc.gain1);
         this.osc.osc2.connect(this.osc.gain2);
         this.osc.osc3.connect(this.osc.gain3);
-        this.osc.tjing.connect(this.osc.gainTjing);
+        this.osc.collision.connect(this.osc.gainCollision);
         this.osc.gain1.connect(this.osc.gainOsc);
         this.osc.gain2.connect(this.osc.gainOsc);
         this.osc.gain3.connect(this.osc.gainOsc);
         this.osc.gainOsc.connect(this.main.tremolo);
-        this.osc.gainTjing.connect(this.main.tremolo);
+        this.osc.gainCollision.connect(this.main.tremolo);
         this.main.tremolo.connect(this.main.master);
         this.main.master.connect(this.main.panner);
         this.main.panner.connect(this.point.audio.compressor);
@@ -110,11 +108,10 @@ export class PointAudio {
         this.osc.osc3.type = this.settings.osctype;
         this.osc.osc3.frequency.value = freq[2];
         this.osc.gain3.gain.value = gain[2];
-
         this.osc.gainOsc.gain.value = 1;
-        this.osc.tjing.frequency.value = freq[0] * 20;
-        this.osc.gainTjing.gain.setValueAtTime(0, this.audioContext.currentTime);
-        this.osc.gainTjing.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.01);
+        this.osc.collision.frequency.value = freq[0] * 20;
+        this.osc.gainCollision.gain.setValueAtTime(0, this.audioContext.currentTime);
+        this.osc.gainCollision.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.01);
     }
 
     startMasterGainModulation() {
@@ -139,13 +136,10 @@ export class PointAudio {
     startOscillators(fadeTime) {
         this.main.master.gain.setValueAtTime(0, this.audioContext.currentTime);
         this.main.master.gain.linearRampToValueAtTime(this.settings.masterGain, this.audioContext.currentTime + this.settings.attack);
-
         this.osc.osc1.start(0);
         this.osc.osc2.start(0);
         this.osc.osc3.start(0);
-
-        this.osc.tjing.start();
-
+        this.osc.collision.start();
         if (fadeTime > 0) {
             const release = Math.min(2, 2 * fadeTime); // in seconds
             this.main.tremolo.gain.setValueCurveAtTime(

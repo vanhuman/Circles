@@ -12,6 +12,7 @@ export class Point {
     delayClear = 0;
     collision = true;
     stopped = false;
+    startedToStop = false;
 
     constructor(canvas, audio, config) {
         this.canvas = canvas;
@@ -156,23 +157,34 @@ export class Point {
         if (CanvasConfig.params.movementFactor) {
             duration = CanvasConfig.params.movementFactor * duration;
         }
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             setTimeout(() => {
-                this.pointAudio.scheduleStop(4);
-                if (this.pointMovement.movePointTask) {
-                    this.pointMovement.movePointTask.stop();
+                if (!this.startedToStop) {
+                    this.stop().then(() => resolve());
+                } else {
+                    reject();
                 }
-                this.clearPoint().then(() => {
-                    if (this.pointMovement.vibratePointTask) {
-                        this.pointMovement.vibratePointTask.stop();
-                    }
-                    this.stopped = true;
-                    this.pointMovement = null;
-                    this.pointAudio = null;
-                    this.canvas.deRegisterPoint(this);
-                    resolve();
-                });
             }, duration * 1000);
+        });
+    }
+
+    stop() {
+        return new Promise((resolve) => {
+            this.startedToStop = true;
+            this.pointAudio.scheduleStop(4);
+            if (this.pointMovement.movePointTask) {
+                this.pointMovement.movePointTask.stop();
+            }
+            this.clearPoint().then(() => {
+                if (this.pointMovement.vibratePointTask) {
+                    this.pointMovement.vibratePointTask.stop();
+                }
+                this.stopped = true;
+                this.pointMovement = null;
+                this.pointAudio = null;
+                this.canvas.deRegisterPoint(this);
+                resolve();
+            });
         });
     }
 

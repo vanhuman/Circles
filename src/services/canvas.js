@@ -3,6 +3,14 @@ import {Helper} from '../helpers/helper.js';
 
 export class Canvas {
     pointPosition = new Map();
+    listeningForWindowSize = false;
+    statusList = [];
+    resizeFunction = function() {
+        setTimeout(() => window.location.reload());
+    };
+    orientationChangeFunction = function() {
+        window.location.reload();
+    };
 
     constructor() {
         this.initCanvas();
@@ -14,7 +22,12 @@ export class Canvas {
         this.setSize();
         this.setBackground();
         this.setAlpha();
-        // this.listenForWindowSizeChanges();
+        this.listenForWindowSizeChanges();
+        this.listenForKeys();
+    }
+
+    setDrawing(drawing) {
+        this.drawing = drawing;
     }
 
     registerPointPosition(point, position) {
@@ -42,12 +55,46 @@ export class Canvas {
     }
 
     listenForWindowSizeChanges() {
-        window.addEventListener('resize', function() {
-            setTimeout(function(){ window.location.reload() })
-        }, false);
-        window.addEventListener('orientationchange', function() {
-            window.location.reload();
-        }, false);
+        if (!this.listeningForWindowSize) {
+            window.addEventListener('resize', this.resizeFunction);
+            window.addEventListener('orientationchange', this.orientationChangeFunction);
+        } else {
+            window.removeEventListener('resize', this.resizeFunction);
+            window.removeEventListener('orientationchange', this.orientationChangeFunction);
+        }
+        this.listeningForWindowSize = !this.listeningForWindowSize;
+    }
+
+    listenForKeys() {
+        let self = this;
+        window.addEventListener('keyup', function(event) {
+            if (event.key === 'n') {
+                self.setStatus('Requesting next scenario...');
+                const stopPromises = Array.from(self.pointPosition.keys()).map(point => point.stop());
+                Promise.all(stopPromises).then(() => self.drawing.runRandomScenario(true));
+            }
+            if (event.key === 's') {
+                self.listenForWindowSizeChanges();
+                self.setStatus('Window size listener is ' + (self.listeningForWindowSize ? 'ON' : 'OFF'));
+            }
+        });
+    }
+
+    setStatus(status = 'status') {
+        if (status) {
+            clearInterval(this.statusTimeout);
+            this.statusList.push(status);
+            if (this.statusList.length > 3) {
+                this.statusList.shift();
+            }
+            const statusBar = window.document.getElementById('status');
+            statusBar.style.display = 'block';
+            statusBar.innerHTML = this.statusList.map((status, index) => index === this.statusList.length - 1 ? '> ' + status : status).join('<br />');
+            this.statusTimeout = setTimeout(() => {
+                statusBar.style.display = 'none';
+                this.statusList = [];
+            }, 10000);
+        }
     }
 
     setSize() {

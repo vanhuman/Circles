@@ -22,6 +22,7 @@ export class App {
     startDrawing() {
         const drawing = new Drawing(this.canvas, this.audio);
         this.postInstructions(drawing);
+        this.canvas.setDrawing(drawing);
 
         const scenario = CanvasConfig.params.scenario ?? null;
         if (scenario && drawing['scenario_' + scenario] instanceof Function) {
@@ -32,6 +33,8 @@ export class App {
     }
 
     postInstructions(object) {
+        console.log('Hit n to trigger the next scenario.');
+        console.log('Hit s to toggle window size listener.');
         console.log('Use querystring parameters for different configurations. Possible keys are scenario, color, background, alpha, disableClear, enableClear, ' +
             ' clearWithDelay, vibrationFactor, movementFactor, circles');
         const scenarios = Object.getOwnPropertyNames(Object.getPrototypeOf(object)).filter(method => method.substring(0, 8) === 'scenario');
