@@ -24,8 +24,9 @@ export class PointMovement {
         let dx, dy;
         let waitFactor = CanvasConfig.params.vibrationFactor ?? 1;
         let jump = 1;
+        const jumpPosition = randInt(20, 99);
         this.vibratePointTask = Helper.taskConstructor(function () {
-            if (count % 100 === 99 && countTo === 0 && Math.random() < config.jumpChance && config.withJumps) {
+            if (count % 100 === jumpPosition && countTo === 0 && Math.random() < config.jumpChance && config.withJumps) {
                 countTo = config.jumpSteps;
             }
             if (countTo > 0) {

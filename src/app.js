@@ -33,8 +33,6 @@ export class App {
     }
 
     postInstructions(object) {
-        console.log('Hit n to trigger the next scenario.');
-        console.log('Hit s to toggle window size listener.');
         console.log('Use querystring parameters for different configurations. Possible keys are scenario, color, background, alpha, disableClear, enableClear, ' +
             ' clearWithDelay, vibrationFactor, movementFactor, circles');
         const scenarios = Object.getOwnPropertyNames(Object.getPrototypeOf(object)).filter(method => method.substring(0, 8) === 'scenario');
@@ -47,5 +45,11 @@ export class App {
         console.log('The parameters vibrationFactor and movementFactor influence the speed of vibration and movement: lower values increase the speed, ' +
             'higher values slow it down.');
         console.log('The circles parameter turns the points into circles. If no value is passed the default size factor (0.95) is used.');
+        console.log('Keyboard shortcuts:');
+        console.log('n: trigger the next scenario');
+        console.log('a: trigger the same scenario again (with possibly other random arguments)');
+        console.log('s: toggle window size listener');
+        console.log('q: stop playback');
+        console.log('p: start playback');
     }
 }

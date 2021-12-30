@@ -44,7 +44,7 @@ export class Drawing {
                 .startVibration(new VibrationConfig(3))
                 .stopAfter(randInt(40, 60)),
             this.drawPoint(new DrawConfig(CanvasConfig.width * 3 / 4, 300, getRandomColor(), 200))
-                .setClearBeforeDraw(true)
+                .setClearBeforeDraw(false)
                 .setDelayClear(1000)
                 .startVibration(new VibrationConfig(5, true, 3, 40, 0.2))
                 .stopAfter(randInt(40, 60)),
@@ -53,15 +53,16 @@ export class Drawing {
     }
 
     scenario_duet() {
-        CanvasConfig.params.circles = 0.95;
+        this.canvas.setBackground('fff');
+        CanvasConfig.params.circles = 0.55;
         Promise.all([
-            this.drawPoint(new DrawConfig(CanvasConfig.width / 2, CanvasConfig.height / 2, getRandomColor([0, 0, 0], [0, 50, 255]), 200))
-                .startVibration(new VibrationConfig(1))
-                .startMovement(new MovementConfig(10, 3, 1, 1))
+            this.drawPoint(new DrawConfig(CanvasConfig.width / 2, CanvasConfig.height - 110, getRandomColor([0, 0, 0], [155, 50, 255]), 200))
+                .startVibration(new VibrationConfig(1, true, 300, 2, 0.1))
+                .startMovement(new MovementConfig(10, 2, 1, -1))
                 .stopAfter(randInt(40, 60)),
-            this.drawPoint(new DrawConfig(CanvasConfig.width / 2, CanvasConfig.height / 2, getRandomColor([0, 0, 0], [0, 255, 50]), 200))
-                .startVibration(new VibrationConfig(1))
-                .startMovement(new MovementConfig(15, 2, -1, -1))
+            this.drawPoint(new DrawConfig(CanvasConfig.width / 2, CanvasConfig.height - 110, getRandomColor([0, 0, 0], [50, 255, 50]), 200))
+                .startVibration(new VibrationConfig(1, true, 100, 3, 0.1))
+                .startMovement(new MovementConfig(10, 2, -1, -1))
                 .stopAfter(randInt(40, 60))
         ]).then(() => this.runRandomScenario(), () => {
         });
@@ -103,24 +104,36 @@ export class Drawing {
     }
 
     scenario_big() {
+        let minLength = 30;
+        let maxLength = 60;
+        if (Math.random() < 0.5) {
+            CanvasConfig.params.disableClear = "ON";
+            this.canvas.setAlpha(Math.random() * 0.1 + 0.005);
+            minLength = 60;
+            maxLength = 120;
+        }
         Promise.all([
             this.drawPoint(new DrawConfig(CanvasConfig.width / 2, 500, getRandomColor(), 2000))
                 .startVibration(new VibrationConfig(3))
                 .startMovement(new MovementConfig(5, 1, -1, 1))
-                .stopAfter(randInt(30, 60)),
+                .stopAfter(randInt(minLength, maxLength)),
             this.drawPoint(new DrawConfig(CanvasConfig.width / 4, 300, getRandomColor(), 2000))
                 .startVibration(new VibrationConfig(3))
                 .startMovement(new MovementConfig(5, 0, 1, 1))
-                .stopAfter(randInt(30, 60)),
+                .stopAfter(randInt(minLength, maxLength)),
             this.drawPoint(new DrawConfig(CanvasConfig.width * 3 / 4, 300, getRandomColor(), 2000))
                 .startVibration(new VibrationConfig(3))
                 .startMovement(new MovementConfig(2, 1, 1, -1))
-                .stopAfter(randInt(30, 60))
+                .stopAfter(randInt(minLength, maxLength))
         ]).then(() => this.runRandomScenario(), () => {
         });
     }
 
     scenario_small() {
+        if (Math.random() < 0.5) {
+            CanvasConfig.params.disableClear = "ON";
+            this.canvas.setAlpha(Math.random() * 0.1 + 0.005);
+        }
         this.canvas.setBackground('000');
         const size = 40;
         const colorFunc = Math.random() < 0.5 ? getRandomColor : () => [255, 255, 255];
@@ -147,8 +160,7 @@ export class Drawing {
     }
 
     scenario_paint() {
-        // this.canvas.setBackground('fff');
-        this.canvas.setAlpha(0.2);
+        this.canvas.setAlpha(Math.random() * 0.6 + 0.005);
         CanvasConfig.params.disableClear = "ON";
         Promise.all([
             this.drawPoint(new DrawConfig(CanvasConfig.width / 4, 300, getRandomColor(), 200))
@@ -183,23 +195,23 @@ export class Drawing {
 
     scenario_red_alpha() {
         this.canvas.setBackground('000');
-        this.canvas.setAlpha(0.05);
+        this.canvas.setAlpha(Math.random() * 0.1 + 0.005);
         CanvasConfig.params.disableClear = "ON";
         CanvasConfig.params.delayClear = 3000;
         Promise.all([
             this.drawPoint(new DrawConfig(CanvasConfig.width / 4, CanvasConfig.height / 4, getRandomColor([50, 0, 0], [255, 0, 0]), 200))
                 .startVibration(new VibrationConfig(2, true, 30, 10, 0.2))
-                .stopAfter(60),
+                .stopAfter(randInt(60, 120)),
             this.drawPoint(new DrawConfig(CanvasConfig.width / 4, CanvasConfig.height / 4, getRandomColor([50, 0, 0], [255, 0, 0]), 200, 1))
                 .startVibration()
-                .stopAfter(80),
+                .stopAfter(randInt(60, 120)),
             this.drawPoint(new DrawConfig(3 * CanvasConfig.width / 4, CanvasConfig.height / 4, getRandomColor([50, 0, 0], [255, 0, 0]), 200, 2))
                 .startVibration()
                 .startMovement(new MovementConfig(3, 3, 1, 1))
-                .stopAfter(80),
+                .stopAfter(randInt(60, 120)),
             this.drawPoint(new DrawConfig(3 * CanvasConfig.width / 4, CanvasConfig.height / 4, getRandomColor([50, 0, 0], [255, 0, 0]), 200))
                 .startVibration()
-                .stopAfter(90)
+                .stopAfter(randInt(60, 120))
         ]).then(() => this.runRandomScenario(), () => {
         });
     }
@@ -226,43 +238,39 @@ export class Drawing {
         });
     }
 
-    scenario_blue_alpha() {
-        CanvasConfig.params.disableClear = "ON";
-        this.canvas.setAlpha(0.05);
-        CanvasConfig.params.delayClear = 5000;
-        Promise.all([
-            this.drawPoint(new DrawConfig(randInt(0, CanvasConfig.width), randInt(0, CanvasConfig.height), getRandomColor([0, 0, 50], [0, 0, 255]), 200))
-                .startVibration()
-                .stopAfter(randInt(60, 70)),
-            this.drawPoint(new DrawConfig(randInt(0, CanvasConfig.width), randInt(0, CanvasConfig.height), getRandomColor([0, 0, 50], [0, 0, 255]), 200))
-                .startVibration(new VibrationConfig(2, true))
-                .stopAfter(randInt(60, 70)),
-            this.drawPoint(new DrawConfig(randInt(0, CanvasConfig.width), randInt(0, CanvasConfig.height), getRandomColor([0, 0, 50], [0, 0, 255]), 200))
-                .startVibration()
-                .stopAfter(randInt(60, 70)),
-            this.drawPoint(new DrawConfig(randInt(0, CanvasConfig.width), randInt(0, CanvasConfig.height), getRandomColor([0, 0, 50], [0, 0, 255]), 200))
-                .startVibration()
-                .stopAfter(randInt(60, 70))
-        ]).then(() => this.runRandomScenario(), () => {
-        });
-    }
-
     scenario_blue() {
+        let vibrationWidth = 1;
+        let vibrationWithJumps = false;
+        let showRed = false;
         this.canvas.setBackground('000');
-        Promise.all([
+        if (Math.random() < 0.5) {
+            CanvasConfig.params.disableClear = "ON";
+            this.canvas.setAlpha(Math.random() * 0.1 + 0.005);
+            CanvasConfig.params.delayClear = 5000;
+            vibrationWidth = 2;
+            vibrationWithJumps = true;
+            showRed = true;
+        }
+        let promises = [
             this.drawPoint(new DrawConfig(randInt(0, CanvasConfig.width), randInt(0, CanvasConfig.height), getRandomColor([0, 0, 50], [0, 0, 255]), 200))
                 .startVibration()
-                .stopAfter(randInt(60, 70)),
+                .stopAfter(randInt(60, 120)),
+            this.drawPoint(new DrawConfig(randInt(0, CanvasConfig.width), randInt(0, CanvasConfig.height), getRandomColor([0, 0, 50], [0, 0, 255]), 200))
+                .startVibration(new VibrationConfig(vibrationWidth, vibrationWithJumps))
+                .stopAfter(randInt(60, 120)),
             this.drawPoint(new DrawConfig(randInt(0, CanvasConfig.width), randInt(0, CanvasConfig.height), getRandomColor([0, 0, 50], [0, 0, 255]), 200))
                 .startVibration()
-                .stopAfter(randInt(60, 70)),
+                .stopAfter(randInt(60, 120)),
             this.drawPoint(new DrawConfig(randInt(0, CanvasConfig.width), randInt(0, CanvasConfig.height), getRandomColor([0, 0, 50], [0, 0, 255]), 200))
                 .startVibration()
-                .stopAfter(randInt(60, 70)),
-            this.drawPoint(new DrawConfig(randInt(0, CanvasConfig.width), randInt(0, CanvasConfig.height), getRandomColor([0, 0, 50], [0, 0, 255]), 200))
+                .stopAfter(randInt(60, 120))
+        ];
+        if (showRed) {
+            promises.push(this.drawPoint(new DrawConfig(randInt(0, CanvasConfig.width), randInt(CanvasConfig.height - 200, CanvasConfig.height), getRandomColor([10, 0, 0], [40, 0, 0]), 200))
                 .startVibration()
-                .stopAfter(randInt(60, 70))
-        ]).then(() => this.runRandomScenario(), () => {
+                .stopAfter(randInt(60, 120)));
+        }
+        Promise.all(promises).then(() => this.runRandomScenario(), () => {
         });
     }
 
@@ -272,7 +280,7 @@ export class Drawing {
             this.drawPoint(new DrawConfig(CanvasConfig.width / 2, CanvasConfig.height / 2, getRandomColor([0, 0, 50], [0, 0, 255]), 200))
                 .startVibration()
                 .stopAfter(randInt(60, 70)),
-            this.drawPoint(new DrawConfig(CanvasConfig.width / 2, CanvasConfig.height / 2, getRandomColor([0, 0, 50], [0, 0, 255]), 200))
+            this.drawPoint(new DrawConfig(CanvasConfig.width / 2, CanvasConfig.height / 2, getRandomColor([0, 50, 50], [0, 100, 255]), 200))
                 .startVibration(new VibrationConfig(2, true, 10, 2, 0.5))
                 .stopAfter(randInt(60, 70)),
             this.drawPoint(new DrawConfig(CanvasConfig.width / 2, CanvasConfig.height / 2, getRandomColor([0, 0, 50], [0, 0, 255]), 200))
@@ -286,48 +294,66 @@ export class Drawing {
     }
 
     scenario_green() {
-        this.canvas.setBackground('000');
+        let vibrationWithJumps = false;
+        if (Math.random() < 0.5) {
+            CanvasConfig.params.disableClear = "ON";
+            this.canvas.setAlpha(Math.random() * 0.1 + 0.005);
+            CanvasConfig.params.delayClear = 5000;
+            vibrationWithJumps = true;
+        } else {
+            this.canvas.setBackground('000');
+        }
         Promise.all([
-            this.drawPoint(new DrawConfig(randInt(0, CanvasConfig.width), randInt(0, CanvasConfig.height), getRandomColor([0, 20, 0], [0, 155, 0]), 200))
-                .startVibration(new VibrationConfig(1))
+            this.drawPoint(new DrawConfig(randInt(0, CanvasConfig.width), randInt(0, CanvasConfig.height), getRandomColor([0, 20, 0], [0, 255, 0]), 200))
+                .startVibration(new VibrationConfig(1, vibrationWithJumps, 100, 2, 0.2))
                 .startMovement(new MovementConfig(3, 0, 1, 1))
-                .stopAfter(randInt(60, 70)),
-            this.drawPoint(new DrawConfig(randInt(0, CanvasConfig.width), randInt(0, CanvasConfig.height), getRandomColor([0, 20, 0], [0, 155, 0]), 200))
+                .stopAfter(randInt(80, 120)),
+            this.drawPoint(new DrawConfig(randInt(0, CanvasConfig.width), randInt(0, CanvasConfig.height), getRandomColor([0, 20, 0], [0, 255, 0]), 200))
                 .startVibration(new VibrationConfig(1))
                 .startMovement(new MovementConfig(4, 0, 1, 1))
-                .stopAfter(randInt(60, 70)),
-            this.drawPoint(new DrawConfig(randInt(0, CanvasConfig.width), randInt(0, CanvasConfig.height), getRandomColor([0, 20, 0], [0, 155, 0]), 200))
+                .stopAfter(randInt(80, 120)),
+            this.drawPoint(new DrawConfig(randInt(0, CanvasConfig.width), randInt(0, CanvasConfig.height), getRandomColor([0, 20, 0], [0, 255, 0]), 200))
                 .startVibration(new VibrationConfig(1))
                 .startMovement(new MovementConfig(5, 0, 1, 1))
-                .stopAfter(randInt(60, 70)),
-            this.drawPoint(new DrawConfig(randInt(0, CanvasConfig.width), randInt(0, CanvasConfig.height), getRandomColor([0, 20, 0], [0, 155, 0]), 200))
+                .stopAfter(randInt(80, 120)),
+            this.drawPoint(new DrawConfig(randInt(0, CanvasConfig.width), randInt(0, CanvasConfig.height), getRandomColor([0, 20, 0], [0, 255, 0]), 200))
                 .startVibration(new VibrationConfig(1))
                 .startMovement(new MovementConfig(4, 0, 1, 1))
-                .stopAfter(randInt(60, 70))
+                .stopAfter(randInt(80, 120))
         ]).then(() => this.runRandomScenario(), () => {
         });
     }
 
-    scenario_green_alpha() {
-        // this.canvas.setBackground('fff');
+    scenario_green_red_alpha() {
+        this.canvas.setBackground('fff');
         CanvasConfig.params.disableClear = "ON";
         this.canvas.setAlpha(0.05);
         CanvasConfig.params.delayClear = 5000;
         Promise.all([
-            this.drawPoint(new DrawConfig(randInt(0, CanvasConfig.width), randInt(0, CanvasConfig.height), getRandomColor([0, 20, 0], [0, 255, 0]), 200))
-                .startVibration(new VibrationConfig(1))
+            this.drawPoint(new DrawConfig(randInt(0, CanvasConfig.width), randInt(0, CanvasConfig.height), getRandomColor([20, 20, 0], [100, 255, 0]), 200))
+                .startVibration(new VibrationConfig(1,true, 100, 2, 0.5))
                 .startMovement(new MovementConfig(3, 0, 1, 1))
                 .stopAfter(randInt(80, 90)),
-            this.drawPoint(new DrawConfig(randInt(0, CanvasConfig.width), randInt(0, CanvasConfig.height), getRandomColor([0, 20, 0], [0, 255, 0]), 200))
-                .startVibration(new VibrationConfig(1))
+            this.drawPoint(new DrawConfig(randInt(0, CanvasConfig.width), randInt(0, CanvasConfig.height), getRandomColor([20, 20, 0], [100, 255, 0]), 200))
+                .startVibration(new VibrationConfig(1,true, 100, 2, 0.8))
                 .startMovement(new MovementConfig(4, 0, 1, 1))
+                .stopAfter(randInt(80, 90))
+        ]).then(() => this.runRandomScenario(), () => {
+        });
+    }
+
+    scenario_blue_red_alpha() {
+        this.canvas.setBackground('fff');
+        CanvasConfig.params.disableClear = "ON";
+        this.canvas.setAlpha(Math.random() * 0.1 + 0.005);
+        CanvasConfig.params.delayClear = 10000;
+        Promise.all([
+            this.drawPoint(new DrawConfig(randInt(0, CanvasConfig.width), randInt(0, CanvasConfig.height), getRandomColor([20, 0, 0], [100, 0, 255]), 200))
+                .startVibration(new VibrationConfig(1,true, 100, 2, 0.5))
+                .startMovement(new MovementConfig(3, 0, 1, 1))
                 .stopAfter(randInt(80, 90)),
-            this.drawPoint(new DrawConfig(randInt(0, CanvasConfig.width), randInt(0, CanvasConfig.height), getRandomColor([0, 20, 0], [0, 255, 0]), 200))
-                .startVibration(new VibrationConfig(1))
-                .startMovement(new MovementConfig(5, 0, 1, 1))
-                .stopAfter(randInt(80, 90)),
-            this.drawPoint(new DrawConfig(randInt(0, CanvasConfig.width), randInt(0, CanvasConfig.height), getRandomColor([0, 20, 0], [0, 255, 0]), 200))
-                .startVibration(new VibrationConfig(1))
+            this.drawPoint(new DrawConfig(randInt(0, CanvasConfig.width), randInt(0, CanvasConfig.height), getRandomColor([20, 0, 0], [100, 0, 255]), 200))
+                .startVibration(new VibrationConfig(1,true, 100, 2, 0.8))
                 .startMovement(new MovementConfig(4, 0, 1, 1))
                 .stopAfter(randInt(80, 90))
         ]).then(() => this.runRandomScenario(), () => {
@@ -384,6 +410,14 @@ export class Drawing {
                 }, 100);
             }
         }
+    }
+
+    runSameScenario() {
+        this.reset(true);
+        setTimeout(() => {
+            this.canvas.setStatus('Playing ' + this.currentScenario.name);
+            this.currentScenario.call(this);
+        }, 100);
     }
 
     drawPoint(config) {

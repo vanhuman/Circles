@@ -21,6 +21,10 @@ export class PointAudio {
         setTimeout(() => {
             this.firstBreathIsPassed = true;
         }, 100);
+        if (Math.random() < 0.5) {
+            this.settings.osctype = 'sawtooth';
+            this.settings.masterGain = 0.03;
+        }
     }
 
     play(fadeTime = 0) {

@@ -73,6 +73,11 @@ export class Canvas {
                 const stopPromises = Array.from(self.pointPosition.keys()).map(point => point.stop());
                 Promise.all(stopPromises).then(() => self.drawing.runRandomScenario(true));
             }
+            if (event.key === 'a') {
+                self.setStatus('Requesting same scenario again...');
+                const stopPromises = Array.from(self.pointPosition.keys()).map(point => point.stop());
+                Promise.all(stopPromises).then(() => self.drawing.runSameScenario());
+            }
             if (event.key === 's') {
                 self.listenForWindowSizeChanges();
                 self.setStatus('Window size listener is ' + (self.listeningForWindowSize ? 'ON' : 'OFF'));
