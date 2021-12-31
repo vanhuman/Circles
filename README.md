@@ -3,9 +3,11 @@
 Circles is a audio-visual online installation.
 
 ## Configuration
-Use querystring parameters for different configurations. Possible keys are: scenario, color, background, alpha, disableClear, enableClear,  clearWithDelay, vibrationFactor, movementFactor, circles 
+Use querystring parameters for different configurations. Possible keys are: scenario, size, color, background, alpha, disableClear, enableClear,  clearWithDelay, vibrationFactor, movementFactor, circles 
 
 Values for scenario: static, duet, walk, big, small, paint, audiotest, red_alpha, red, blue, blue_middle, green, green_red_alpha, blue_red_alpha, yellow. 
+
+Size is in number of pixels.
 
 Color and background are hexadecimal without the # sign. 
 
