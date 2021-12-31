@@ -17,12 +17,11 @@ export class Canvas {
     }
 
     initCanvas() {
-        this.canvas = document.getElementById('MovingPointsCanvas');
+        this.canvas = document.getElementById('CirclesCanvas');
         this.context = this.canvas.getContext('2d');
         this.setSize();
         this.setBackground();
         this.setAlpha();
-        this.listenForWindowSizeChanges();
         this.listenForKeys();
     }
 
@@ -131,7 +130,7 @@ export class Canvas {
         } else {
             hexColor = Helper.rgbToHex(CanvasConfig.baseColor);
         }
-        const body = document.getElementById('MovingPoints');
+        const body = document.getElementById('Circles');
         body.style.backgroundColor = '#' + hexColor;
         this.context.fillStyle = "rgb(" + CanvasConfig.baseColor[0] + "," + CanvasConfig.baseColor[1] + "," + CanvasConfig.baseColor[2] + ")";
         this.context.fillRect(0, 0, CanvasConfig.width, CanvasConfig.height);
